@@ -1,0 +1,22 @@
+/*
+ * Override default bootstrap styles.
+ */
+/*
+ * 連続したbreadcrumbリストの間隔を縮める。
+ * bs3デフォルトでは .breadcrumb{margin-bottom:20px;} となっているから、ここから 15px 引く。
+ */
+ul.breadcrumb+ul.breadcrumb {
+	margin-top: -15px;
+}
+
+/*
+ * Reset font size.
+ * Default font size is too small!
+ */
+//body,pre {
+//	font-size: initial;
+//}
+//p {
+//	/*font-size: initial;*/
+//	margin: 0 0 1.25em;
+//}

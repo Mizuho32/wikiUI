@@ -1,0 +1,82 @@
+:experimental:
+:stylesdir: stylesheets/
+:stylesheet: asciidoctor.css
+////
+:stem: latexmath
+:imagesdir: img
+:sectnums:
+:source-highlighter: highlightjs
+:highlightjsdir: highlight
+////
+
+= UI
+2016/3/5
+
+++++
+<style media="all">
+  .imageblock>.title{
+    text-align: center;
+  }
+  #header{
+    text-align: center;
+  }
+  #header > .details{
+    font-size: 1.3em;
+  }
+  h2{
+    font-size: 1.95em;
+  }
+</style>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script> 
+<script type="text/javascript">
+var hey = null;
+var int = setInterval(()=>{
+  clearInterval(int);
+
+  var ws = hey = new WebSocket('ws://localhost:8888/'); 
+  console.log(ws);
+
+  var int2 = setInterval(()=>{
+    clearInterval(int2);
+
+    if(ws != null){
+      ws.send("regist:report.adoc");
+
+      ws.onmessage = function(event){
+        console.log("reload");
+        ws.close();
+        location.reload();
+      };
+    }
+  }, 500);
+}, 500);
+</script>
+++++
+++++
+<div class="keyseq">
+  <input type="button" value="button" />
+  <input type="button" value="button2" />
+</div>
+++++
+
+Press the btn:[OK] button when you are finished.
+
+Select a file in the file navigator and click btn:[Open].
+
+Press the btn:[OK]
+|===
+|Shortcut |Purpose
+
+|kbd:[F11]
+|Toggle fullscreen
+
+|kbd:[Ctrl+T]
+|Open a new tab
+
+|kbd:[Ctrl+Shift+N]
+|New incognito window
+
+|kbd:[Ctrl + +]
+|Increase zoom
+|===

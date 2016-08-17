@@ -1,0 +1,48 @@
+@import "bootstrap3.min";
+
+@mixin font-awesome($icon) {
+	font-family: 'FontAwesome';
+	content: $icon;
+}
+
+@mixin admon($fg-color, $bg, $icon) {
+	border-left: 0.75rem $fg-color solid;
+
+	td.content{
+		border-top: initial;
+		>div.title:first-child {
+			color: $fg-color;
+			border-left: initial;
+			padding-left: initial;
+			font-size: 1.5em;
+			&::before {
+				display: inline-block;
+				@include font-awesome($icon);
+				color: $fg-color;
+				margin: 0 0.5rem;
+			}
+		}
+	}
+}
+
+@import "override-bs3";
+@import "bs3-asciidoctor";
+@import "rogy-wiki1";
+
+/*
+ * Default styles.
+ */
+table {
+	@extend .table;
+}
+
+
+/*
+ * Custom styles
+ */
+p {
+	line-height: 1.6;
+}
+li >p:last-child {
+	margin-bottom: 0.2em;
+}

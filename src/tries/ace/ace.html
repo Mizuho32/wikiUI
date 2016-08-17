@@ -1,0 +1,32 @@
+<style>
+  #editor{
+    position: absolute;
+    width: 300px;
+    height: 400px;
+  }
+</style>
+<div class="col" id="editor">class Ruby
+self
+end
+
+def hello
+1 = 2
+end</div>
+<script src="ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<!--<script src="ace-builds/src/ext-themelist.js"></script>-->
+<script>
+var aceroot = "ace-builds/src";
+var editor = ace.edit("editor");
+editor.commands.addCommand({
+  name: 'render',
+  bindKey: {win: 'Ctrl-Enter'},
+  exec: (e)=>{
+    //alert(editor.getValue());
+    render();
+  },
+  readOnly: true
+});
+editor.getSession().setMode("ace/mode/ruby");
+editor.setTheme("ace/theme/terminal");
+
+</script>

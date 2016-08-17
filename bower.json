@@ -1,0 +1,28 @@
+{
+  "name": "wikiUI",
+  "description": "UI for wiki article",
+  "authors": [
+    "Mizuho"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "gulp"
+  ],
+  "moduleType": [
+    "es6"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vue": "^1.0.26",
+    "asciidoctor.js": "^1.5.4",
+    "ace-builds": "^1.2.5"
+  }
+}

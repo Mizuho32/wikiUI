@@ -1,0 +1,319 @@
+<!DOCTYPE HTML>
+
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>New</title>
+    <link rel="stylesheet" href="css/main.css" >
+    <!--<script src="js/lib/opal/opal/current/opal.min.js"></script>-->
+    <script src="js/lib/asciidoctor-all.min.js"></script>
+    <script src="js/lib/vue.min.js"></script>
+
+        <!-- font awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+        <!-- pygments -->
+        <link rel="stylesheet" href="css/pygments/colorful.css">
+
+        <!-- bootstrap3 -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" >
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonym
+ous"></script>
+
+        <!-- Toggle Button -->
+        <!--<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">-->
+        <!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
+
+        <!-- Select Box -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+
+    <!-- Original Asciidoctor theme -->
+    <!--<link rel="stylesheet" type="text/css" href=css/asciidoctor.css></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">-->
+  </head>
+  <body>
+    <div class="container">
+      <div id="auth">
+        <div id="content" v-show="showauth" transition="auth">
+          <div id="frontmatters">
+            <ul class="mainlist">
+              <li class="title">
+                <label for="title">title</label>
+                <input id="title" type="text" name="title" placeholder="タイトル (必須)" style="width:100%" v-model="title">
+              </li>
+              <li class="kind">
+                <label for="kind">kind</label>
+                <select class="selectpicker" data-width="fit" v-model="kindselected">
+                  <option v-for="kinditem in kinditems" v-bind:value="kinditem.value">{{ kinditem.text }}</option>
+                </select>
+                <label for="darft">draft</label>
+                <input id="darft" type="checkbox" data-toggle="toggle" v-model="draft">
+                <label for="math">math</label>
+                <select class="selectpicker" data-width="fit" v-model="mathselected">
+                  <option v-for="item in mathitems" v-bind:value="item.value">
+                    {{ item.text }}
+                  </option>
+                </select>
+              </li>
+              <li class="htag">
+                <div id="htagapp">
+                <label for="htags">htags</label>
+                <button v-on:click="addhtagss" class="btn btn-primary btn-xs">add</button>
+                  <ul id="htagparent">
+                    <li v-for="htagss in htags_holder" :is="htagss.type">
+                    </li>
+                  </ul>
+                </div>
+                <template id="child">
+                  <ul class="breadcrumb">
+                    <button v-on:click="removehtags" class="btn btn-danger btn-xs">&#10005;</button>
+                    <li v-for="htag in htags">
+                      <span>{{ htag.text }}</span>
+                    </li>
+                    <div class="fa fa-tags" />
+                    <input size="3" v-model="newhtag" v-on:keyup.enter="addhtag" v-on:keydown.8="deletehtag" placeholder="タグ">
+                  </ul>
+                </template>
+              </li>
+              <li class="frontmatter">
+                <label for="frontmatter">frontmatter</label>
+                <textarea class="frontmatter" v-model="frontmatter" placeholder="追加のfrontmatter"></textarea>
+              </li>
+            </ul>
+          </div>
+
+          <div id="filemanager">
+            <link rel="stylesheet" href="css/filer.css" scoped="scoped">
+            <div class="btn-group" style="margin-bottom: 4px;">
+              <button @click="fileron=true" type="button" class="btn btn-primary btn-xs">Filer</button>
+              <button @click="fileron=false" type="button" class="btn btn-danger btn-xs">Console</button>
+            </div>
+            <input type="text" v-model="server"></input>
+            <div id="filercontainer" v-show="fileron" transition="filerview" >
+              <button type="button" class="btn btn-xs" @click="up">↑</button>
+              <button type="button" class="btn btn-xs" @click="ShowContent()">&#x21bb;</button>
+              <button type="button" class="btn btn-xs" @click="addfolder">new folder</button>
+              <label>file name:</label>
+              <input type="text" placeholder="ファル名(必須)" v-model="filename" />
+              .adoc
+              <div id="filer">
+                <div v-for="file in files" :is="file.type" v-bind:pname="file.name"></div>
+              </div>
+            </div>
+            <div id="console" v-show="!fileron" transition="filerview">
+              <textarea v-model="data" placeholder="example: cmd:ls, ruby:[*1..10].inject(:+)" @keyup.enter="send()"></textarea>
+              <textarea v-model="ret"></textarea>
+            </div>
+          </div>
+
+          <template id="folder">
+            <div class="card" @click="click">
+              <div class="icon folder">
+                <div class="folder2"></div>
+              </div> 
+              <div class="name">
+                <p>{{ pname }}</p>
+              </div>
+            </div>
+          </template>
+          <template id="file">
+            <div class="card" @click="click">
+              <div class="icon file">
+              <div class="file2"></div>
+                </div>
+              <div class="name">
+                <p>{{ name }}</p>
+              </div>
+            </div>
+          </template>
+        </div>
+        <script src="js/filer.js"></script>
+        
+        <div id="buttons">
+          <button v-on:click="switchauth" class="btn btn-sm">{{ toggle }}</button>
+          <button id="preview" class="btn btn-primary btn-sm">Preview</button>
+          <button v-on:click="editorConf" class="btn btn-primary btn-sm">{{ ediconText }}</button>
+          <button v-on:click="commit" class="btn btn-danger btn-sm">Commit</button>
+          <div class="btn-group">
+            <button @click="render" type="button" class="btn btn-primary">Rendered</button>
+            <button @click="html" type="button" class="btn btn-success">HTML</button>
+            <button @click="raw" type="button" class="btn btn-info">RAW</button>
+          </div>
+        </div>
+      </div>
+      <div class="main">
+        <div id="editorbox" class="col">
+          <div class="container-fluid" v-show="editorconf" transition="editorconf">
+              <div class="row">
+                <div class="col-md-3 col-sm-6">
+                  <label for="UseVim">Use Vim</label>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <input type="checkbox" @change="vimcheck" v-model="vimon" lazy>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3 col-sm-6">
+                  <label>Font size</label>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="input-group">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" @click="fontdec">-</button>
+                    </span>
+                    <span class="fontsize-btn">
+                      <input type="text" class="form-control btn-number" v-model="fontsize" style="width: 100px" v-on="change:fontsizechanged">
+                    </span>
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" @click="fontinc">+</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div id="editor" v-show="!editorconf" transition="editorconf">:sectnums:
+
+http://asciidoctor.org[*Asciidoctor*] +
+running on http://opalrb.org[_Opal_] +
+brings AsciiDoc to the browser! +
+http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
+
+== はじめに
+これは部室内wiki投稿用のツールです。gitの使用が困難な場合に使うといいでしょう。 +
+これは現在新規記事のみ投稿可能です。
+
+== 使い方
+主に記事に関する設定をするもの、記事の作成場所を決めるもの、各種表示の切り替え、本文にUIが分かれています。
+
+=== 記事に関する設定
+上部パネル左が該当します。 +
+
+|===
+|title | 記事タイトル | 必須
+|kind | 記事の種類です。現在articleに固定されてます。 | 必須
+|draft | 記事に草案の属性を付与します。 | 任意
+|math | MathJaxを有効にします。AMSで式番号を有効化します。 | 任意
+| htags | 記事にタグを付与します。任意ですがタグ付けはした方がいいでしょう | 任意
+|frontmatter | さらに属性を追加するのに使います。 | 任意
+|===
+
+htagsは例えば以下の様に設定します +
+ロ技研/ガイドライン/wiki +
+部室内
+
+=== ファイル作成場所に関する設定
+上部パネル右が該当します。 +
+
+ファイルブラウザにて表示されている場所がファイル作成場所になります。ファイル名の設定も忘れないでください。 +
+また、Consoleボタンから直接サーバー上でコマンドを実行することが出来ます。
+
+.例
+[source,bash]
+----
+cmd:ls -F
+ruby:p "Hello World"
+mkfile,hello.rb:puts "Hello World"
+----
+実行はEnterで行うので改行を含むような入力は行えません。
+
+=== 各種表示切り替え、実行
+上部パネル下部のボタンで行います。 +
+
+Commitボタンで記事の投稿が行えます。この際、投稿される記事はRAWボタンを押して表示される内容となります。 +
+表示された記事を直接編集して投稿しても構いません。ただしRAWボタンを押すたびに上書きされるので気をつけてください。
+
+ボタン群左端のボタンで上部パネルを隠すことが出来ます。
+
+=== 本文
+記事の作成が出来ます。エディタ上でCtrl+Enterで描画されます。Vimキーバインド・フォントサイズの変更が可能です。
+
+== AsciiDocサンプル
+
+[NOTE]
+.NOTE
+====
+note
+====
+
+[TIP]
+.TIP
+====
+tip
+====
+
+[IMPORTANT]
+.IMPORTANT
+====
+important
+====
+
+[CAUTION]
+.CAUTION
+====
+caution
+====
+
+[WARNING]
+.WARNING
+====
+これは危険です！
+====
+
+== 次に
+latex
+
+* 1
+* 2
+* 3
+
+// ^
+
+. r
+. g
+. b
+
+
+1::
+one
++
+ひとつ
+2::
+two
++
+ふたつ
+3::
+three
++
+みっつ
+
+== 3
+
+|===
+| 1 | 2 | 3
+| I | my | me
+|===</div>
+          <script src="js/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+        </div>
+        <div id="renderbox" class="col">
+          <!-- Original styles with bootstrap3 included -->
+          <link rel="stylesheet" href="css/rogiken1-bs3.css" scoped="scoped">
+          <div id="render" v-show="rightview === 'render'" transition="rawview">initial</div>
+          <textarea v-show="rightview !== 'render'" transition="rawview" v-model="righttextarea" style="width:100%;height:100%;overflow:hiden;"></textarea>
+        </div>
+        <script type="text/javascript" src="js/main.js"></script>
+      </div>
+    </div>
+  </body>
+</html>
+

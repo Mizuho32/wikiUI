@@ -1,0 +1,10 @@
+Gemfile.lock
+bower_components/
+node_modules/
+vendor/*
+lib/
+.*.swp
+.*.swo
+access_token
+.*/
+cred.yaml

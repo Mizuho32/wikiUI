@@ -2,6 +2,8 @@
 rogywiki用のUI
 
 # Init
-`$ npm install`
-`$ bower install`
-`$ gulp js`
+```
+$ npm install
+$ bower install
+$ gulp js
+```

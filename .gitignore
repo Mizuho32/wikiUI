@@ -8,3 +8,7 @@ lib/
 access_token
 .*/
 cred.yaml
+src/servers/log/*
+servers.yaml
+config.js
+pid

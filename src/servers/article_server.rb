@@ -9,13 +9,17 @@ require 'open3'
 require 'em-websocket'
 require 'pp'
 require 'json'
+require 'yaml'
 
+
+y = YAML.load_file 'servers.yaml'
 root = ARGV[0] || raise("ARGV[0], root directory is  missing")
-Dir::chdir root
+File.open("pid", "w+"){|file| file.print Process.pid }
+
 
 @connections = {}
 
-EM::WebSocket.start(host: 'localhost', port:8000) do |con|
+EM::WebSocket.start(host: y[:filer][:host], port:y[:filer][:port]) do |con|
   con.onopen do
     p "opend"
     con.send("opened! #{con}")
@@ -24,6 +28,10 @@ EM::WebSocket.start(host: 'localhost', port:8000) do |con|
 
   con.onclose do
     @connections.delete con
+    if @connections.size == 0 then  
+      `echo '' > pid`
+      exit 0
+    end
   end
 
   con.onmessage do |msg|
@@ -68,7 +76,8 @@ EOF
       end
     rescue Exception => e
       puts e.message, e.backtrace
-        con.send("#{e.message}\n#{e.backtrace}")
+      con.send("#{e.message}\n#{e.backtrace}")
+      `echo '' > pid`
     end
   end
 

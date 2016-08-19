@@ -100,6 +100,8 @@ ous"></script>
               <button @click="fileron=false" type="button" class="btn btn-danger btn-xs">Console</button>
             </div>
             <input type="text" v-model="server"></input>
+            <button type="button" @click="open" class="btn btn-success btn-xs">open</button>
+            <button type="button" @click="conclose" class="btn btn-danger btn-xs">close</button>
             <div id="filercontainer" v-show="fileron" transition="filerview" >
               <button type="button" class="btn btn-xs" @click="up">↑</button>
               <button type="button" class="btn btn-xs" @click="ShowContent()">&#x21bb;</button>
@@ -138,6 +140,7 @@ ous"></script>
             </div>
           </template>
         </div>
+        <script type="text/javascript" src="js/config.js"></script>
         <script src="js/filer.js"></script>
         
         <div id="buttons">
@@ -200,12 +203,12 @@ http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
 上部パネル左が該当します。 +
 
 |===
-|title | 記事タイトル | 必須
-|kind | 記事の種類です。現在articleに固定されてます。 | 必須
-|draft | 記事に草案の属性を付与します。 | 任意
-|math | MathJaxを有効にします。AMSで式番号を有効化します。 | 任意
-| htags | 記事にタグを付与します。任意ですがタグ付けはした方がいいでしょう | 任意
-|frontmatter | さらに属性を追加するのに使います。 | 任意
+|title       | 記事タイトル                                                     | 必須
+|kind        | 記事の種類です。現在articleに固定されてます。                    | 必須
+|draft       | 記事に草案の属性を付与します。                                   | 任意
+|math        | MathJaxを有効にします。AMSで式番号を有効化します。               | 任意
+|htags       | 記事にタグを付与します。任意ですがタグ付けはした方がいいでしょう | 任意
+|frontmatter | さらに属性を追加するのに使います。                               | 任意
 |===
 
 htagsは例えば以下の様に設定します +
@@ -300,7 +303,7 @@ three
 == 3
 
 |===
-| 1 | 2 | 3
+| 1 | 2  | 3
 | I | my | me
 |===</div>
           <script src="js/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>

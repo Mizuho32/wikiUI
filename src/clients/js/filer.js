@@ -61,7 +61,7 @@ var filer = new Vue({
     query: '"cmd":"ls"',
     files: [],
     counter: 0, 
-    server: "localhost:8000",
+    server: config.filer,
     //onmsg: false,
     fileron: true,
     filename: ''
@@ -89,6 +89,9 @@ var filer = new Vue({
     send: function(o){
       if (o != null) this.data = o;
       this.connection.send(`${this.data}`);
+    },
+    conclose: function(){
+      this.connection.close();
     },
     addfolder: function(){
       //this.newname = `folder ${this.counter++}`;

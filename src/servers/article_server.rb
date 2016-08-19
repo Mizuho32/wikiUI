@@ -45,6 +45,7 @@ EM::WebSocket.start(host: y[:filer][:host], port:y[:filer][:port]) do |con|
           con.send "/#{@connections[con][:current].join ?/}"
         else
           con.send <<-"EOF"
+#{msg}:
 #{(r = Open3.capture3("cd /#{@connections[con][:current].join ?/};" + msg[/^cmd[^:]*:(.+)\Z/m, 1]))[0].to_s},#{r[1]},#{r[2]}
 EOF
         end

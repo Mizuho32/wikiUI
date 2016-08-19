@@ -62,7 +62,6 @@ var filer = new Vue({
     files: [],
     counter: 0, 
     server: config.filer,
-    //onmsg: false,
     fileron: true,
     filename: ''
   },
@@ -82,7 +81,20 @@ var filer = new Vue({
       
       this.connection.onmessage = function(e){
         that.ret = e.data;
-        that.onmsg = true;
+
+        if (m=that.ret.match(/^cmd:ls.*:\n((?:.|\s)*)/)){
+          that.files = [];
+          m[1].slice(0,m[1].indexOf(",")).split("\n").forEach((e,i,ar)=>{
+            if(e === "") return;
+            if (e.match(/^.+\//)){
+              that.files.push({type: 'folder', name:e});
+            }
+            else{
+              that.files.push({type: 'file', name:e});
+            }
+          });
+        }
+
         //debug.log(that.ret);
       }
     },
@@ -120,19 +132,6 @@ var filer = new Vue({
     ShowContent: function(){
       this.data = 'cmd:ls -F';
       this.send();
-      setTimeout( ()=>{
-        //console.log(`SC ${this.ret}`);
-        this.files = [];
-        this.ret.slice(0,this.ret.indexOf(",")).split("\n").forEach((e,i,ar)=>{
-          if(e === "") return;
-          if (e.match(/^.+\//)){
-            this.files.push({type: 'folder', name:e});
-          }
-          else{
-            this.files.push({type: 'file', name:e});
-          }
-        });
-      }, 10);
     }
   }
 });

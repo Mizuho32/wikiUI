@@ -3,6 +3,6 @@
 source "https://rubygems.org"
 
 # gem "rails"
-gem "sinatra"
-gem 'httparty'
+# gem "sinatra"
+# gem 'httparty'
 gem 'em-websocket'

@@ -137,9 +137,7 @@ var Contaienr = new Vue({
     rightview:      'render',
     righttextarea:  '',
     kindselected:   'article',
-    frontmatter:    '',
-
-    commitbutton: "danger"
+    frontmatter:    ''
   },
   computed:{
     toggle: function(){
@@ -179,6 +177,9 @@ var Contaienr = new Vue({
 
       filer.send(`cmd:git add ${filer.filename}.adoc;git commit -m '${msg}'`);
     },
+		push: function(){
+			if (confirm("pushします")) filer.send(`cmd:${config.push}`);
+		},
     editorConf: function(){
       this.editorconf = ! this.editorconf;  
     },

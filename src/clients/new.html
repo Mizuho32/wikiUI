@@ -43,7 +43,7 @@ ous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">-->
   </head>
   <body>
-    <div class="container">
+    <div class="container" style="padding: 0;">
       <div id="auth">
         <div id="content" v-show="showauth" transition="auth">
           <div id="frontmatters">
@@ -311,7 +311,6 @@ three
           <script src="js/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
         </div>
         <div id="renderbox" class="col">
-          <!-- Original styles with bootstrap3 included -->
           <link rel="stylesheet" href="css/rogiken1-bs3.css" scoped="scoped">
           <div id="render" v-show="rightview === 'render'" transition="rawview">initial</div>
           <textarea v-show="rightview !== 'render'" transition="rawview" v-model="righttextarea" style="width:100%;height:100%;overflow:hiden;"></textarea>

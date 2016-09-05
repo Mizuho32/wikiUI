@@ -1,7 +1,9 @@
 .card {
   width:  80px;
   height: 80px;
-  margin-bottom: 10%;
+  margin-bottom: 50px;
+  //margin-left: 10px;
+  //margin-right: 10px;
   position: relative;
 }
 .icon.folder:hover {

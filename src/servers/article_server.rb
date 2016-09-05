@@ -30,8 +30,8 @@ EM::WebSocket.start(host: y[:filer][:host], port:y[:filer][:port]) do |con|
     @connections.delete con
     if @connections.size == 0 then  
       `echo '' > pid`
-			EM::WebSocket.stop
-      exit 0
+			# EM::WebSocket.stop
+      # exit 0
     end
   end
 

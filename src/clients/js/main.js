@@ -56,8 +56,10 @@ var render = ()=>{
     }
     if (Container.draft)
       front.status = "draft";
+
     if (Container.mathjax != undefined)
       front.mathjax = Container.mathjax;
+
     if (Container.frontmatter !== ''){
       const f = jsyaml.load(Container.frontmatter);
       for (let k of Object.keys(f))
@@ -131,7 +133,7 @@ var Container = new Vue({
       this.htags.push("");
     },
     addtag: function(row){
-      this.htags[row] += "/" + this.newtag; 
+      this.htags[row] = (this.htags[row] && `${this.htags[row]}/`) + this.newtag; 
       this.newtag = "";
       this.htags.push(null);this.htags.pop();
 

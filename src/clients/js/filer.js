@@ -36,7 +36,9 @@ var File = Vue.extend({
   },
   methods: {
     click: function(){
-      alert(this.pname);
+      //alert(this.pname);
+      this.$parent.data = `cmdr:cat ${this.pname}`;
+      this.$parent.send();
     }
   },
   computed: {
@@ -93,9 +95,39 @@ var filer = new Vue({
               that.files.push({type: 'file', name:e});
             }
           });
-        }
+        }else if (m=that.ret.match(/^cmdr:cat\s+(.*):\n((?:.|\s)*)/)){
+          if ( (filename = m[1].match(/^(.+)\.adoc$/)) != null && confirm(`Open ${filename[0]} ?`) ){
+            // load a existing file
+            let file = m[2].match(/---\n((?:.|\s)+?)\n---\n((?:.|\s)*)$/);
+            console.log(file);
+            that.filename = filename[1];
+            editor.setValue(file[2]);
+            Container.newarticle = false;
 
-        //debug.log(that.ret);
+            //let f = m[2].match(/---\n((?:.|\s)+?)\n---/);
+            //console.log(f[1]);
+            let frontmatters = jsyaml.load(file[1]);
+            frontmatters.created_at = iso8601(frontmatters.created_at);
+            console.log(frontmatters);
+            for(let f of ["title", "excerpt", "kind", "mathjax", "created_at"]){
+              Container[f] = frontmatters[f];
+              delete frontmatters[f];
+            }
+            Container.draft = (frontmatters.status && true) || false;
+            delete frontmatters["status"]
+
+            if (frontmatters.htags != null){
+              Container.htags = frontmatters.htags;
+              delete frontmatters["htags"]
+            }
+
+            if (Object.keys(frontmatters).length != 0)
+              Container.frontmatter = jsyaml.safeDump( frontmatters );
+            console.log(frontmatters);
+
+          }else
+            alert("Asciidoc文書ではない可能性が有ります");
+        }
       }
     },
     send: function(o){
@@ -130,7 +162,7 @@ var filer = new Vue({
       this.send(`mkfile,${this.filename}.${ext}:${content}`);
     },
     ShowContent: function(){
-      this.data = 'cmd:ls -F';
+      this.data = 'cmd:ls -p';
       this.send();
     }
   }

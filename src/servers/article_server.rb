@@ -46,10 +46,16 @@ EM::WebSocket.start(host: y[:filer][:host], port:y[:filer][:port]) do |con|
           CD @connections[con], msg[/cd(.+)/m, 1].to_s.strip
           con.send "/#{@connections[con][:current].join ?/}"
         else
-          con.send c=<<-"EOF"
+          c = nil
+          r = Open3.capture3("cd /#{@connections[con][:current].join ?/};" + msg[/^cmd[^:]*:(.+)\Z/m, 1])
+          if msg =~ /\Acmd:/
+            con.send c=<<-"EOF"
 #{msg}:
-#{(r = Open3.capture3("cd /#{@connections[con][:current].join ?/};" + msg[/^cmd[^:]*:(.+)\Z/m, 1]))[0].to_s},#{r[1]},#{r[2]}
+#{r[0].to_s},#{r[1]},#{r[2]}
 EOF
+          else
+            con.send c="#{msg}:\n#{r[0].to_s}"
+          end
 					puts c
         end
       elsif msg =~ /\Amkfile/

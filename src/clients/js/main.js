@@ -27,105 +27,68 @@ var options = Opal.hash({
 //var text =    document.getElementById("text");
 var output =  document.getElementById('render');
 var title = document.getElementById("title");
+var iso8601 = (now)=>{
+  let day = now.toISOString().match(/(.+T)/)[1];
+  let timezone = (m=now.toTimeString().match(/([\d:]+).+(\+\d{2})(\d{2})/))[1] + m[2] + ":" + m[3];
+  return day + timezone;
+};
 var render = ()=>{
-if (Contaienr.rightview === 'render' )
+if (Container.rightview === 'render' )
   output.innerHTML = Opal.Asciidoctor.$convert(
     `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
   , options);
-else if (Contaienr.rightview === 'html' )
-  Contaienr.righttextarea = Opal.Asciidoctor.$convert(
+else if (Container.rightview === 'html' )
+  Container.righttextarea = Opal.Asciidoctor.$convert(
     `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
   , options);
 else{
   var now = new Date();
-  console.log(now.toISOString());
+  //console.log(now.toISOString());
   var day = now.toISOString().match(/(.+T)/)[1];
   var timezone = (m=now.toTimeString().match(/([\d:]+).+(\+\d{2})(\d{2})/))[1] + m[2] + ":" + m[3];
   var front =
-`title: "${Contaienr.title}"
-created_at: ${day + timezone}
-excerpt: "${Contaienr.title}"
-kind: ${Contaienr.kindselected}
+`title: "${Container.title}"
+created_at: ${ Container.newarticle ? day + timezone : Container.created_at}
+excerpt: "${Container.title}"
+kind: ${Container.kind}
 `;
-  if (Contaienr.htags.some( (e,i)=>e.length!==0 )){
-    var htags = Contaienr.htags.filter( (e,i)=>e.length !== 0 );
-    front += `htags:\n${htags.map((a)=>a.map(c=>c.text).join('/')).map(b=>`  - "${b}"`).join("\n")}\n`;
+  if (Container.htags.some( (e,i)=>e.length!==0 )){
+    var htags = Container.htags.filter( (e,i)=>e.length !== 0 );
+    front += `htags:\n${htags.map(a=>`  - "${a}"`).join("\n")}\n`;
   }
-  if (Contaienr.draft)
+  if (Container.draft)
     front += "status: draft\n";
-  if (Contaienr.mathselected !== 'none')
-    front += `mathjax: ${Contaienr.mathselected}\n`;
-  if (Contaienr.frontmatter !== '')
-    front += Contaienr.frontmatter + "\n";
-  Contaienr.righttextarea = 
+  if (Container.mathjax != undefined)
+    front += `mathjax: ${Container.mathjax}\n`;
+  if (Container.frontmatter !== '')
+    front += Container.frontmatter + "\n";
+  Container.righttextarea = 
 `---
 ${front}---
 ${editor.getValue()}`;
-console.log(Contaienr.mathselected);
+//console.log(Container.mathjax);
 }
 
 };
 
   
 //Vue
-var Child = Vue.extend({
-  template: '#child',
-  data: function(){
-    return {
-      newhtag: '',
-      index:null,
-      htags:null,
-      htag_holder:null
-    };
-  },
-  created: function(){
-    console.log(this.$parent.htags.length);
-    this.index = this.$parent.htags.length;
-    this.$parent.htags.push([]);
-    this.htags = this.$parent.htags[this.index];
-    this.htag_holder = this.$parent.htags_holder[this.index];
-  },
-  methods:{
-    addhtag: function(ev){
-      console.log(this);
-      console.log(this.$parent.htags);
-      var text = this.newhtag.trim();
-      if(text){
-        console.log(text);
-        //this.$parent.htags[this.index].push({ text: text});
-        this.htags.push({ text: text});
-        this.newhtag = '';
-      }
-    },
-    removehtags: function(){
-      try{
-        this.$parent.htags.some((v,i)=>{ 
-          if(v === this.htags)  this.$parent.htags.splice(i, 1);});
-        this.$parent.htags_holder.some((v,i)=>{ 
-          if(v === this.htag_holder) this.$parent.htags_holder.splice(i, 1);});
-      } catch(e){}
-    },
-    deletehtag: function(){
-      if (this.newhtag.length === 0 ) this.htags.pop(1);
-    }
-  }
-});
-Vue.component('child', Child);
 
-
-var Contaienr = new Vue({
+var Container = new Vue({
   el: '.container',
   data:{
     title:        '',
     draft:        false,
-    htags_holder: [ { type: 'child' } ],
-    htags:        [],
+    htags:        [
+      "",
+    ],
+    kind:  'article',
     kinditems:[
       {text: 'article', value: 'article'}
     ],
-    mathselected: 'none',
+    mathjax: undefined,
     mathitems:[
-      {text: 'none',  value: 'none'},
+      {text: 'none',  value: undefined},
       {text: 'ON',    value: 'on'  },
       {text: 'AMS',   value: 'AMS' }
     ],
@@ -136,8 +99,11 @@ var Contaienr = new Vue({
     editorconf:     false,
     rightview:      'render',
     righttextarea:  '',
-    kindselected:   'article',
-    frontmatter:    ''
+    frontmatter:    '',
+    newarticle: true,
+    created_at: null,
+    newtag: null,
+    current: null
   },
   computed:{
     toggle: function(){
@@ -148,14 +114,34 @@ var Contaienr = new Vue({
     },
     rawviewText: function(){
       return this.rawview ? "rendered" : "raw";
+    },
+    htagscmp: function(){
+      return this.htags.map((el,i)=>el.split("/"));
     }
   },
   created: function(){
   },
   methods:{
-    addhtagss: function(){
-      console.log("HI");
-      this.htags_holder.push({ type: 'child'});
+    addhtag: function(){
+      this.htags.push("");
+    },
+    addtag: function(row){
+      this.htags[row] += "/" + this.newtag; 
+      this.newtag = "";
+      this.htags.push(null);this.htags.pop();
+
+      setTimeout(()=>document.getElementById("taginput").focus() ,10);
+    },
+    deletetag: function(row, col){
+      let tmp = this.htags[row].split("/");
+      tmp.pop();
+      this.htags[row] = tmp.join("/");
+      this.htags.push(null);this.htags.pop();
+
+      setTimeout(()=>document.getElementById("taginput").focus() ,10);
+    },
+    deletehtag: function(row){
+      this.htags.splice(row, 1);
     },
     switchauth: function(){
       this.toggled = !this.toggled;
@@ -228,3 +214,6 @@ var Contaienr = new Vue({
 
 render();
 document.getElementById("preview").onclick = render;
+$(function () {
+$('[data-toggle="tooltip"]').tooltip()
+})

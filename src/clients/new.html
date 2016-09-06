@@ -6,7 +6,6 @@
     <meta charset="utf-8">
     <title>New</title>
     <link rel="stylesheet" href="css/main.css" >
-    <!--<script src="js/lib/opal/opal/current/opal.min.js"></script>-->
     <script src="js/lib/asciidoctor-all.min.js"></script>
     <script src="js/lib/vue.min.js"></script>
 
@@ -54,13 +53,13 @@ ous"></script>
               </li>
               <li class="kind">
                 <label for="kind">kind</label>
-                <select class="selectpicker" data-width="fit" v-model="kindselected">
+                <select class="selectpicker" data-width="fit" v-model="kind">
                   <option v-for="kinditem in kinditems" v-bind:value="kinditem.value">{{ kinditem.text }}</option>
                 </select>
                 <label for="darft">draft</label>
                 <input id="darft" type="checkbox" data-toggle="toggle" v-model="draft">
                 <label for="math">math</label>
-                <select class="selectpicker" data-width="fit" v-model="mathselected">
+                <select class="selectpicker" data-width="fit" v-model="mathjax">
                   <option v-for="item in mathitems" v-bind:value="item.value">
                     {{ item.text }}
                   </option>
@@ -69,17 +68,25 @@ ous"></script>
               <li class="htag">
                 <div id="htagapp">
                 <label for="htags">htags</label>
-                <button v-on:click="addhtagss" class="btn btn-primary btn-xs">add</button>
+                <button v-on:click="addhtag" class="btn btn-primary btn-xs">add</button>
                   <ul id="htagparent">
-                    <li v-for="htagss in htags_holder" :is="htagss.type">
+                    <li v-for="(row, htag) in htagscmp">
+                      <ul class="breadcrumb" style="margin-bottom:5px;" v-on:mouseenter="current=row">
+                        <button v-on:click="deletehtag(row)" class="btn btn-danger btn-xs">&#10005;</button>
+                        <li v-for="(col, tag) in htag">
+                          <span>{{ tag }}</span>
+                        </li>
+                        <div class="fa fa-tags" />
+                        <input id="taginput" size="3" v-if="current==row" v-model="newtag" v-on:keyup.enter="addtag(row)" v-on:keydown.8="deletetag(row,col)" placeholder="タグ">
+                      </ul>
                     </li>
                   </ul>
                 </div>
                 <template id="child">
                   <ul class="breadcrumb">
                     <button v-on:click="removehtags" class="btn btn-danger btn-xs">&#10005;</button>
-                    <li v-for="htag in htags">
-                      <span>{{ htag.text }}</span>
+                    <li v-for="tag in htagcmp">
+                      <span>{{ tag }}</span>
                     </li>
                     <div class="fa fa-tags" />
                     <input size="3" v-model="newhtag" v-on:keyup.enter="addhtag" v-on:keydown.8="deletehtag" placeholder="タグ">
@@ -90,6 +97,13 @@ ous"></script>
                 <label for="frontmatter">frontmatter</label>
                 <textarea class="frontmatter" v-model="frontmatter" placeholder="追加のfrontmatter"></textarea>
               </li>
+              <li class="newarticle">
+                <label for="newarticle" style="width:15%">
+									新規記事
+								</label>
+                <input id="newarticle" type="checkbox" data-toggle="toggle" v-model="newarticle">
+              </li>
+            </ul>
             </ul>
           </div>
 
@@ -107,7 +121,7 @@ ous"></script>
               <button type="button" class="btn btn-xs" @click="ShowContent()">&#x21bb;</button>
               <button type="button" class="btn btn-xs" @click="addfolder">new folder</button>
               <label>file name:</label>
-              <input type="text" placeholder="ファル名(必須)" v-model="filename" />
+              <input type="text" placeholder="ファイル名(必須)" v-model="filename" />
               .adoc
               <div id="filer">
                 <div v-for="file in files" :is="file.type" v-bind:pname="file.name"></div>
@@ -141,6 +155,8 @@ ous"></script>
           </template>
         </div>
         <script type="text/javascript" src="js/config.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.4.2/js-yaml.min.js'></script>  
+
         <script src="js/filer.js"></script>
         
         <div id="buttons">
@@ -177,7 +193,7 @@ ous"></script>
                       <button class="btn btn-default" @click="fontdec">-</button>
                     </span>
                     <span class="fontsize-btn">
-                      <input type="text" class="form-control btn-number" v-model="fontsize" style="width: 100px" v-on="change:fontsizechanged">
+                      <input type="text" class="form-control btn-number" v-model="fontsize" style="width: 100px;text-align:center;" v-on="change:fontsizechanged">
                     </span>
                     <span class="input-group-btn">
                       <button class="btn btn-default" @click="fontinc">+</button>

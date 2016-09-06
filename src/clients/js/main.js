@@ -48,9 +48,6 @@ var render = ()=>{
     var timezone = (m=now.toTimeString().match(/([\d:]+).+(\+\d{2})(\d{2})/))[1] + m[2] + ":" + m[3];
     var front =
     {
-      title: `"${Container.title}"`,
-      created_at: Container.newarticle ? day + timezone : Container.created_at,
-      excerpt: `"${Container.title}"`,
       kind: Container.kind
     };
     if (Container.htags.some( (e,i)=>e.length!==0 )){
@@ -69,7 +66,10 @@ var render = ()=>{
     //console.log(front, jsyaml.safeDump(front));
     Container.righttextarea = 
 `---
-${jsyaml.safeDump(front)}---
+title: "${Container.title}"
+excerpt: "${Container.title}"
+${jsyaml.safeDump(front)}created_at: ${Container.newarticle ? day + timezone : Container.created_at}
+---
 ${editor.getValue()}`;
   //console.log(editor.getValue());
   }

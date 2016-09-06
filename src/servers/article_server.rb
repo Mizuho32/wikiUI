@@ -58,16 +58,18 @@ EOF
           end
 					puts c
         end
-      elsif msg =~ /\Amkfile/
+      elsif msg =~ /\Amkfile/ || msg =~ /\Aowfile/
+
 				p "MKFILE"
-        file = msg[/^(mkfile[^:]*):(.+)\Z/m, 2]
+        file = msg[/^((?:mk|ow)file[^:]*):(.+)\Z/m, 2]
         filename = $1.split(?,)[1].strip
         path = path(@connections[con][:current]) + ?/
         puts "filename = #{filename}\ncontent = #{file}"
+
         if (file.to_s.empty? or filename.to_s.empty?)
           con.send("file or filename is empty")
           next
-        elsif (File.exists?(full = path +  filename))
+        elsif (File.exists?(full = path +  filename) && msg[0] == ?m)
           con.send("File already Exists")
           next
         end

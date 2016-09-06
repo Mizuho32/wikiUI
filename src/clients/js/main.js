@@ -33,41 +33,46 @@ var iso8601 = (now)=>{
   return day + timezone;
 };
 var render = ()=>{
-if (Container.rightview === 'render' )
-  output.innerHTML = Opal.Asciidoctor.$convert(
-    `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
-  , options);
-else if (Container.rightview === 'html' )
-  Container.righttextarea = Opal.Asciidoctor.$convert(
-    `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
-  , options);
-else{
-  var now = new Date();
-  //console.log(now.toISOString());
-  var day = now.toISOString().match(/(.+T)/)[1];
-  var timezone = (m=now.toTimeString().match(/([\d:]+).+(\+\d{2})(\d{2})/))[1] + m[2] + ":" + m[3];
-  var front =
-`title: "${Container.title}"
-created_at: ${ Container.newarticle ? day + timezone : Container.created_at}
-excerpt: "${Container.title}"
-kind: ${Container.kind}
-`;
-  if (Container.htags.some( (e,i)=>e.length!==0 )){
-    var htags = Container.htags.filter( (e,i)=>e.length !== 0 );
-    front += `htags:\n${htags.map(a=>`  - "${a}"`).join("\n")}\n`;
-  }
-  if (Container.draft)
-    front += "status: draft\n";
-  if (Container.mathjax != undefined)
-    front += `mathjax: ${Container.mathjax}\n`;
-  if (Container.frontmatter !== '')
-    front += Container.frontmatter + "\n";
-  Container.righttextarea = 
+  if (Container.rightview === 'render' )
+    output.innerHTML = Opal.Asciidoctor.$convert(
+      `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
+    , options);
+  else if (Container.rightview === 'html' )
+    Container.righttextarea = Opal.Asciidoctor.$convert(
+      `= ${title.value || "タイトルを入力してください" }\n${editor.getValue()}`
+    , options);
+  else{
+    var now = new Date();
+    //console.log(now.toISOString());
+    var day = now.toISOString().match(/(.+T)/)[1];
+    var timezone = (m=now.toTimeString().match(/([\d:]+).+(\+\d{2})(\d{2})/))[1] + m[2] + ":" + m[3];
+    var front =
+    {
+      title: `"${Container.title}"`,
+      created_at: Container.newarticle ? day + timezone : Container.created_at,
+      excerpt: `"${Container.title}"`,
+      kind: Container.kind
+    };
+    if (Container.htags.some( (e,i)=>e.length!==0 )){
+      var htags = Container.htags.filter( (e,i)=>e.length !== 0 );
+      front.htags = htags.map(a=>`  - "${a}"`);
+    }
+    if (Container.draft)
+      front.status = "draft";
+    if (Container.mathjax != undefined)
+      front.mathjax = Container.mathjax;
+    if (Container.frontmatter !== ''){
+      const f = jsyaml.load(Container.frontmatter);
+      for (let k of Object.keys(f))
+        front[k] = f[k];
+    }
+    //console.log(front, jsyaml.safeDump(front));
+    Container.righttextarea = 
 `---
-${front}---
+${jsyaml.safeDump(front)}---
 ${editor.getValue()}`;
-//console.log(Container.mathjax);
-}
+  //console.log(editor.getValue());
+  }
 
 };
 
@@ -153,9 +158,12 @@ var Container = new Vue({
         return;
       }
 
-      if (this.rightview !== "raw") this.raw();
+      this.raw();
       
-      filer.mkfile("adoc", this.righttextarea);
+      if (this.newarticle)
+        filer.file("mkfile", "adoc", this.righttextarea);
+      else
+        filer.file("owfile", "adoc", this.righttextarea);
 
       var msg = prompt("コミットメッセージを入力してください");
       

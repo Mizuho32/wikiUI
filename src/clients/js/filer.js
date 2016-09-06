@@ -84,51 +84,60 @@ var filer = new Vue({
       this.connection.onmessage = function(e){
         that.ret = e.data;
 
-        if (m=that.ret.match(/^cmd:ls.*:\n((?:.|\s)*)/)){
-          that.files = [];
-          m[1].slice(0,m[1].indexOf(",")).split("\n").forEach((e,i,ar)=>{
-            if(e === "") return;
-            if (e.match(/^.+\//)){
-              that.files.push({type: 'folder', name:e});
-            }
-            else{
-              that.files.push({type: 'file', name:e});
-            }
-          });
-        }else if (m=that.ret.match(/^cmdr:cat\s+(.*):\n((?:.|\s)*)/)){
-          if ( (filename = m[1].match(/^(.+)\.adoc$/)) != null && confirm(`Open ${filename[0]} ?`) ){
-            // load a existing file
-            let file = m[2].match(/---\n((?:.|\s)+?)\n---\n((?:.|\s)*)$/);
-            console.log(file);
-            that.filename = filename[1];
-            editor.setValue(file[2]);
-            Container.newarticle = false;
+        try{
+          if (m=that.ret.match(/^cmd:ls.*:\n((?:.|\s)*)/)){
+            that.files = [];
+            m[1].slice(0,m[1].indexOf(",")).split("\n").forEach((e,i,ar)=>{
+              if(e === "") return;
+              if (e.match(/^.+\//)){
+                that.files.push({type: 'folder', name:e});
+              }
+              else{
+                that.files.push({type: 'file', name:e});
+              }
+            });
+          }else if (m=that.ret.match(/^cmdr:cat\s+(.*):\n((?:.|\s)*)/)){
+            if ( (filename = m[1].match(/^(.+)\.adoc$/)) != null && confirm(`Open ${filename[0]} ?`) ){
+              // load a existing file
+              let file = m[2].match(/---\n((?:.|\s)+?)---\n((?:.|\s)*)$/);
+              if (file == null)  throw new TypeError(`File open failed!!\n${m[2]}`);
+              console.log(file);
+              that.filename = filename[1];
+              editor.setValue(file[2]);
+              Container.newarticle = false;
 
-            //let f = m[2].match(/---\n((?:.|\s)+?)\n---/);
-            //console.log(f[1]);
-            let frontmatters = jsyaml.load(file[1]);
-            frontmatters.created_at = iso8601(frontmatters.created_at);
-            console.log(frontmatters);
-            for(let f of ["title", "excerpt", "kind", "mathjax", "created_at"]){
-              Container[f] = frontmatters[f];
-              delete frontmatters[f];
-            }
-            Container.draft = (frontmatters.status && true) || false;
-            delete frontmatters["status"]
+              //let f = m[2].match(/---\n((?:.|\s)+?)\n---/);
+              //console.log(f[1]);
+              let frontmatters = jsyaml.load(file[1]);
+              frontmatters.created_at = iso8601(frontmatters.created_at);
+              console.log(frontmatters);
+              for(let f of ["title", "excerpt", "kind", "mathjax", "created_at"]){
+                Container[f] = frontmatters[f];
+                delete frontmatters[f];
+              }
+              Container.draft = (frontmatters.status && true) || false;
+              delete frontmatters["status"]
 
-            if (frontmatters.htags != null){
-              Container.htags = frontmatters.htags;
-              delete frontmatters["htags"]
-            }
+              if (frontmatters.htags != null){
+                Container.htags = frontmatters.htags;
+                delete frontmatters["htags"]
+              }
 
-            if (Object.keys(frontmatters).length != 0)
-              Container.frontmatter = jsyaml.safeDump( frontmatters );
-            console.log(frontmatters);
+              if (Object.keys(frontmatters).length != 0)
+                Container.frontmatter = jsyaml.safeDump( frontmatters );
+              console.log(frontmatters);
 
-          }else
-            alert("Asciidoc文書ではない可能性が有ります");
+            }else
+              alert("Asciidoc文書ではない可能性が有ります");
+          }else if (that.ret.match(/^File already/)){
+            alert(that.ret);
+          }
+        } catch(e){
+          const err = `${e.name}\n${e.message}\n${e.stack}`;
+          alert(err);
+          console.log(err);
         }
-      }
+      } // connnection
     },
     send: function(o){
       if (o != null) this.data = o;
@@ -156,10 +165,10 @@ var filer = new Vue({
       this.connection.send(`cmd:cd ${to}`);
       this.ShowContent(); 
     },
-    mkfile: function(ext, content){
+    file: function(cmd,ext, content){
       if (this.filename == '') return;
 
-      this.send(`mkfile,${this.filename}.${ext}:${content}`);
+      this.send(`${cmd},${this.filename}.${ext}:${content}`);
     },
     ShowContent: function(){
       this.data = 'cmd:ls -p';

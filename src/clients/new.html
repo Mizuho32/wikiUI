@@ -116,6 +116,7 @@ ous"></script>
             <input type="text" v-model="server"></input>
             <button type="button" @click="open" class="btn btn-success btn-xs">open</button>
             <button type="button" @click="conclose" class="btn btn-danger btn-xs">close</button>
+            <button type="button" @click="send()" class="btn btn-primary btn-xs">send</button>
             <div id="filercontainer" v-show="fileron" transition="filerview" >
               <button type="button" class="btn btn-xs" @click="up">↑</button>
               <button type="button" class="btn btn-xs" @click="ShowContent()">&#x21bb;</button>
@@ -211,7 +212,6 @@ http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
 
 == はじめに
 これは部室内wiki投稿用のツールです。gitの使用が困難な場合に使うといいでしょう。 +
-これは現在新規記事のみ投稿可能です。
 
 == 使い方
 主に記事に関する設定をするもの、記事の作成場所を決めるもの、各種表示の切り替え、本文にUIが分かれています。
